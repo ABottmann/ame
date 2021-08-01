@@ -8,7 +8,6 @@ import com.ebanx.ame.model.Event;
 import com.ebanx.ame.model.enums.EventType;
 import com.ebanx.ame.service.AccountService;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +19,7 @@ public class AccountController
 {
     @Autowired
     private AccountService accountService;
+    private ObjectMapper mapper = new ObjectMapper();
 
     @PostMapping("/reset")
     public ResponseEntity<String> reset() {
@@ -58,13 +58,9 @@ public class AccountController
 
 
     private ResponseEntity<String> Deposit(String destinationAccountNumber, Account destination, int amount) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.disable(MapperFeature.USE_ANNOTATIONS);
-
-        if (destination == null) {
+        if (destination == null)
             destination = accountService.CreateAccount(destinationAccountNumber, amount);
-            mapper.enable(MapperFeature.USE_ANNOTATIONS);
-        } else
+        else
             accountService.Transaction(destination, amount);
 
         return new ResponseEntity<>(mapper.writeValueAsString(new Destination(destination)), HttpStatus.CREATED);
@@ -72,9 +68,6 @@ public class AccountController
 
 
     private ResponseEntity<String> Withdraw(Account origin, int amount) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.disable(MapperFeature.USE_ANNOTATIONS);
-
         if (origin == null)
             return new ResponseEntity<>("0", HttpStatus.NOT_FOUND);
 
@@ -85,9 +78,6 @@ public class AccountController
 
 
     private ResponseEntity<String> Transfer(String destinationAccountNumber, Account origin, Account destination, int amount) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.disable(MapperFeature.USE_ANNOTATIONS);
-
         if (origin == null)
             return new ResponseEntity<>("0", HttpStatus.NOT_FOUND);
 
